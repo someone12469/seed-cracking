@@ -44,3 +44,8 @@ Some information specific to the 1.21.4 panorama:
 - The scripts `grass.py` and `foliage.py` reference the files `p4.png` (panorama image used for cracking) and `screenshot.png` (screenshot made with the mod and datapack); they are included in the repo.
 - The file `oklist.txt` contains some older, less precise zoom seed filtering results, and contains the correct answer, which is 16074632720. It can be useful to speed up debugging.
 - The recreation world download is in `world.zip`. The coordinates used for the analysis are `/tp @p 3052.723999770137 111.65018722695467 335.0234971379097 245.54265071122518`.
+
+For reference, here are the panorama screenshot and the targeted biome transitions:
+<img width="1024" height="1024" alt="image" src="https://github.com/user-attachments/assets/838bc6f7-2562-40a2-93ce-0d3201bc8bfc" />
+<img width="39" height="33" alt="image" src="https://github.com/user-attachments/assets/a3d0afcd-b5fc-4c6b-bee6-a2fcdb202ab9" />
+<img width="83" height="79" alt="image" src="https://github.com/user-attachments/assets/7bedab60-5189-4b50-8cec-3c19aa5f7666" />

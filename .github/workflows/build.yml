@@ -76,7 +76,7 @@ jobs:
         if: matrix.os == 'windows-latest'
         working-directory: src/main/c
         run: |
-          g++ -shared -o crack.dll blocks.cpp xsinv.cpp java_helper.cpp -std=c++23 -O3 -fopenmp -static-libgcc -static-libstdc++ -Iz3/include -Lz3/bin -lz3 -I"$env:JAVA_HOME/include" -I"$env:JAVA_HOME/include/win32"
+          g++ -shared -o crack.dll blocks.cpp xsinv.cpp java_helper.cpp -std=c++23 -O3 -fopenmp "-Wl,-Bstatic" -lgomp -lwinpthread "-Wl,-Bdynamic" -static-libgcc -static-libstdc++ -Iz3/include -Lz3/bin -lz3 -I"$env:JAVA_HOME/include" -I"$env:JAVA_HOME/include/win32"
           cp crack.dll ../resources
 
       - name: Capture shared libraries (ubuntu-latest)

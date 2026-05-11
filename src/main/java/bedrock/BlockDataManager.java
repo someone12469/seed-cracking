@@ -11,7 +11,6 @@ import it.unimi.dsi.fastutil.objects.ObjectList;
 import it.unimi.dsi.fastutil.objects.ObjectLists;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientChunkEvents;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
@@ -91,7 +90,7 @@ public final class BlockDataManager {
 
     private static void startCracking() {
         int size = data.size();
-        displayMessage(Component.translatable("commands.bedrockcrack.startedCracking", size));
+        BedrockSeed.displayMessage(Component.translatable("commands.bedrockcrack.startedCracking", size));
 
         try (Arena arena = Arena.ofConfined()) {
             MemorySegment entries = block_entry.allocateArray(size, arena);
@@ -107,9 +106,9 @@ public final class BlockDataManager {
             stopCollecting();
 
             BedrockNative.bedrockseed$crack(size, entries, 31);
-            displayMessage(Component.translatable("commands.bedrockcrack.finishedCracking"));
+            BedrockSeed.displayMessage(Component.translatable("commands.bedrockcrack.finishedCracking"));
         } catch (Throwable t) {
-            displayMessage(Component.translatable("commands.bedrockcrack.unknownError"));
+            BedrockSeed.displayMessage(Component.translatable("commands.bedrockcrack.unknownError"));
             BedrockSeed.LOGGER.error("An unknown error occurred", t);
         }
     }
@@ -145,21 +144,12 @@ public final class BlockDataManager {
         ClientChunkEvents.CHUNK_LOAD.register((_, chunk) -> scanChunk(chunk.getPos()));
     }
 
-    private static void displayMessage(Component component) {
-        LocalPlayer player = minecraft.player;
-        if (player != null) {
-            minecraft.schedule(() -> player.sendSystemMessage(component));
-        } else {
-            BedrockSeed.LOGGER.info(component.getString());
-        }
-    }
-
     public record BlockData(BlockPos pos, int typ) {
     }
 
     // Called through JNI
     @SuppressWarnings("unused")
-    public static void sendUpdate(String update, Object... args) {
+    public static void sendUpdate(String update, boolean onlyLog, Object... args) {
         Object[] components = Arrays.stream(args)
             .map(arg -> {
                 String string = String.valueOf(arg);
@@ -170,6 +160,6 @@ public final class BlockDataManager {
                 );
             }).toArray(Component[]::new);
         MutableComponent component = Component.translatable(update, components);
-        displayMessage(component);
+        BedrockSeed.displayMessage(component, onlyLog);
     }
 }

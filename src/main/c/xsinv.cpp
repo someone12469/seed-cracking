@@ -49,9 +49,9 @@ static void check(uint64_t lo, uint64_t hi, uint64_t guess)
 
 	// only valid if both match
 	if (testOut1 == nextlong1 && testOut2 == nextlong2) {
-		sendUpdate("commands.bedrockcrack.foundCandidate", lo, hi, guess);
+		sendUpdate("commands.bedrockcrack.foundCandidate", true, lo, hi, guess);
 		if(unstafford13(hi) - unstafford13(lo) == 0x9e3779b97f4a7c15) {
-			sendUpdate("commands.bedrockcrack.foundWorldSeed", unstafford13(lo) ^ 7640891576956012809);
+			sendUpdate("commands.bedrockcrack.foundWorldSeed", false, unstafford13(lo) ^ 7640891576956012809);
 		}
 	}
 }

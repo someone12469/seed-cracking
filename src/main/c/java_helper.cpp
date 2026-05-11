@@ -65,14 +65,14 @@ static jobject boxArg(JNIEnv* env, T) {
 }
 
 template<typename... Args>
-void sendUpdate(const char *update, Args... args) {
+void sendUpdate(const char *update, bool onlyLog, Args... args) {
     bool didAttach = false;
     JNIEnv *env = getEnv(&didAttach);
     if (env == nullptr) {
         return;
     }
 
-    jmethodID mid = env->GetStaticMethodID(g_blockDataManagerCls, "sendUpdate", "(Ljava/lang/String;[Ljava/lang/Object;)V");
+    jmethodID mid = env->GetStaticMethodID(g_blockDataManagerCls, "sendUpdate", "(Ljava/lang/String;Z[Ljava/lang/Object;)V");
     if (mid == NULL) {
         fprintf(stderr, "Method not found!\n");
         if (didAttach) {
@@ -82,6 +82,7 @@ void sendUpdate(const char *update, Args... args) {
     }
 
     jstring j_update = env->NewStringUTF(update);
+    jboolean j_onlyLog = static_cast<jboolean>(onlyLog);
 
     const int n = sizeof...(args);
     jclass objectClass = env->FindClass("java/lang/Object");
@@ -92,7 +93,7 @@ void sendUpdate(const char *update, Args... args) {
         env->DeleteLocalRef(objs[i]);
     }
 
-    env->CallStaticVoidMethod(g_blockDataManagerCls, mid, j_update, array);
+    env->CallStaticVoidMethod(g_blockDataManagerCls, mid, j_update, j_onlyLog, array);
 
     // clean up
     env->DeleteLocalRef(j_update);
@@ -105,7 +106,7 @@ void sendUpdate(const char *update, Args... args) {
 }
 
 // some stupid shit
-template void sendUpdate<>(const char*);
-template void sendUpdate<uint64_t>(const char*, uint64_t);
-template void sendUpdate<uint64_t, uint64_t>(const char*, uint64_t, uint64_t);
-template void sendUpdate<uint64_t, uint64_t, uint64_t>(const char*, uint64_t, uint64_t, uint64_t);
+template void sendUpdate<>(const char*, bool);
+template void sendUpdate<uint64_t>(const char*, bool, uint64_t);
+template void sendUpdate<uint64_t, uint64_t>(const char*, bool, uint64_t, uint64_t);
+template void sendUpdate<uint64_t, uint64_t, uint64_t>(const char*, bool, uint64_t, uint64_t, uint64_t);

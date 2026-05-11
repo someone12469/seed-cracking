@@ -240,15 +240,15 @@ void bedrockseed$crack(int size, block_entry* entries, int mode)
 		}
 	}
 	auto sol1 = solve(xvs1, 1);
-	sendUpdate("commands.bedrockcrack.completedBitSearch1");
+	sendUpdate("commands.bedrockcrack.completedBitSearch1", false);
 	auto sol2 = solve(xvs2, 2);
-	sendUpdate("commands.bedrockcrack.completedBitSearch2");
+	sendUpdate("commands.bedrockcrack.completedBitSearch2", false);
 	auto sol3 = solve(xvs3, 3);
-	sendUpdate("commands.bedrockcrack.completedBitSearch3");
+	sendUpdate("commands.bedrockcrack.completedBitSearch3", false);
 	auto sol4 = solve(xvs4, 4);
-	sendUpdate("commands.bedrockcrack.completedBitSearch4");
+	sendUpdate("commands.bedrockcrack.completedBitSearch4", false);
 	auto sol5 = solve(xvs5, 5);
-	sendUpdate("commands.bedrockcrack.completedBitSearch5");
+	sendUpdate("commands.bedrockcrack.completedBitSearch5", false);
 	// I = unknown
 	// S = I ^ BEDROCK, T = I ^ DEEPSLATE, V = I ^ ORE
 	// O0 = forkPositional(S), O1 = forkPositional(T), O2 = forkPositional(V)
@@ -321,19 +321,19 @@ void bedrockseed$crack(int size, block_entry* entries, int mode)
 	if(sol3.size()) constrain(sol3, O4, O5);
 	if(sol4.size()) constrain(sol4, O6, O7);
 	if(sol5.size()) constrain(sol5, O8, O9);
-	sendUpdate("commands.bedrockcrack.startingZ3Search");
+	sendUpdate("commands.bedrockcrack.startingZ3Search", false);
 	z3::check_result res = solver.check();
 	if (res == z3::unknown) {
-		sendUpdate("commands.bedrockcrack.Z3Failed");
+		sendUpdate("commands.bedrockcrack.Z3Failed", false);
 		return;
 	}
 	if (res == z3::unsat) {
-		sendUpdate("commands.bedrockcrack.Z3Unsat");
+		sendUpdate("commands.bedrockcrack.Z3Unsat", false);
 		return;
 	}
 	assert(res == z3::sat);
 	z3::model m = solver.get_model();
 	uint64_t i0 = m.eval(I0).get_numeral_uint64(), i1 = m.eval(I1).get_numeral_uint64();
-	sendUpdate("commands.bedrockcrack.crackedRandomStateRandom", i0, i1);
+	sendUpdate("commands.bedrockcrack.crackedRandomStateRandom", false, i0, i1);
 	crackFP(i0, i1);
 }

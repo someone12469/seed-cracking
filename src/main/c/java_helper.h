@@ -5,4 +5,4 @@
 extern "C" JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM *vm, void *reserved);
 
 template<typename... Args>
-void sendUpdate(const char *update, Args... args);
+void sendUpdate(const char *update, bool onlyLog, Args... args);

@@ -12,6 +12,10 @@ base {
 }
 
 repositories {
+    maven {
+        name = 'DJtheRedstoner'
+        url = 'https://pkgs.dev.azure.com/djtheredstoner/DevAuth/_packaging/public/maven/v1'
+    }
 }
 
 dependencies {
@@ -20,6 +24,10 @@ dependencies {
 	implementation "net.fabricmc:fabric-loader:${project.loader_version}"
 
 	implementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_api_version}"
+
+    runtimeOnly("me.djtheredstoner:DevAuth-fabric:${project.devauth_version}") {
+        exclude group: 'net.fabricmc', module: 'fabric-loader'
+    }
 }
 
 tasks.register('createJavaBindings', CreateJavaBindingsTask) {}

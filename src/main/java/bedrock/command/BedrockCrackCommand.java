@@ -1,5 +1,6 @@
 package bedrock.command;
 
+import bedrock.BedrockSeed;
 import bedrock.BlockDataManager;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
@@ -33,7 +34,7 @@ public class BedrockCrackCommand {
         }
 
         BlockDataManager.startCollecting();
-        source.sendFeedback(Component.translatable("commands.bedrockcrack.startedCollecting"));
+        BedrockSeed.displayMessage(Component.translatable("commands.bedrockcrack.startedCollecting"));
 
         ChunkPos pos = ChunkPos.containing(BlockPos.containing(source.getPosition()));
         int renderDistance = source.getClient().options.renderDistance().get();
@@ -48,7 +49,7 @@ public class BedrockCrackCommand {
         }
 
         int scannedChunks = BlockDataManager.getScannedChunks();
-        source.sendFeedback(Component.translatable("commands.bedrockcrack.progress", scannedChunks, BlockDataManager.TARGET_CHUNKS));
+        BedrockSeed.displayMessage(Component.translatable("commands.bedrockcrack.progress", scannedChunks, BlockDataManager.TARGET_CHUNKS));
         return scannedChunks;
     }
 
@@ -58,7 +59,7 @@ public class BedrockCrackCommand {
         }
 
         BlockDataManager.stopCollecting();
-        source.sendFeedback(Component.translatable("commands.bedrockcrack.stoppedCollecting"));
+        BedrockSeed.displayMessage(Component.translatable("commands.bedrockcrack.stoppedCollecting"));
 
         return Command.SINGLE_SUCCESS;
     }

@@ -4,6 +4,8 @@
 #include <cstdint>
 #include <jni.h>
 
+extern "C" JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM *vm, void *reserved);
+
 static const jint JNI_VERSION = JNI_VERSION_24;
 
 static JavaVM *g_vm = nullptr;

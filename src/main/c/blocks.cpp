@@ -19,15 +19,27 @@
 #include <utility>
 #include <z3++.h>
 
-uint64_t getSeed(int x, int y, int z)
+static void crackFP(uint64_t nextlong1, uint64_t nextlong2)
+{
+#ifdef __x86_64__
+	if(__builtin_cpu_supports("avx512f"))
+		crackFP_avx512(nextlong1, nextlong2);
+	else if(__builtin_cpu_supports("avx2"))
+		crackFP_avx2(nextlong1, nextlong2);
+	else
+#endif
+		crackFP_baseline(nextlong1, nextlong2);
+}
+
+constexpr uint64_t getSeed(int x, int y, int z)
 {
 	// obviously the first multiplication is 32-bit while the second is 64-bit
-		uint64_t seed = int64_t(int32_t(uint32_t(x) * 3129871u) ^ int64_t(uint64_t(z) * 116129781u) ^ int32_t(y));
-		return int64_t(((seed * seed) * 42317861) + (seed * 11)) >> 16; // signed right shift
+	uint64_t seed = int64_t(int32_t(uint32_t(x) * 3129871u) ^ int64_t(uint64_t(z) * 116129781u) ^ int32_t(y));
+	return int64_t(((seed * seed) * 42317861) + (seed * 11)) >> 16; // signed right shift
 }
 
 template<int ITER>
-bool get(uint64_t seedlo, uint64_t seedhi, uint64_t xv, double p)
+static bool get(uint64_t seedlo, uint64_t seedhi, uint64_t xv, double p)
 {
 	uint64_t s0 = xv, s1 = 0;
 	for(size_t i = 0; i < ITER; i++) {
@@ -60,7 +72,7 @@ struct beam_entry {
 	}
 };
 
-std::vector<std::bitset<128>> solve(std::vector<std::tuple<uint64_t, double, bool>> xvs, int mode)
+static std::vector<std::bitset<128>> solve(std::vector<std::tuple<uint64_t, double, bool>> xvs, int mode)
 {
 	if(xvs.size() == 0)
 		return {};
@@ -125,11 +137,11 @@ std::vector<std::bitset<128>> solve(std::vector<std::tuple<uint64_t, double, boo
 }
 
 using point3 = std::tuple<int,int,int>;
-z3::expr Rnd(z3::expr S0, z3::expr S1)
+static z3::expr Rnd(z3::expr S0, z3::expr S1)
 {
 	return (S0 + S1).rotate_left(17) + S0;
 }
-std::pair<z3::expr, z3::expr> Step(z3::expr S0, z3::expr S1)
+static std::pair<z3::expr, z3::expr> Step(z3::expr S0, z3::expr S1)
 {
 	auto S12 = S0 ^ S1;
 	return {S0.rotate_left(49) ^ S12 ^ z3::shl(S12, 21), S12.rotate_left(28)};

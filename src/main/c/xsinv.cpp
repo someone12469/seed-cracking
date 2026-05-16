@@ -12,7 +12,8 @@ constexpr void foreach(auto&& f, std::index_sequence<Inds...>) {
 }
 
 namespace stdx = std::experimental;
-using simd = stdx::fixed_size_simd<uint64_t, 8>;
+using simd = stdx::native_simd<uint64_t>;
+constexpr size_t SIMD_BITS = 64 * simd::size();
 
 static uint64_t unstafford13(uint64_t x)
 {
@@ -27,7 +28,7 @@ static uint64_t unstafford13(uint64_t x)
 	return x;
 }
 
-uint64_t nextlong1, nextlong2;
+static uint64_t nextlong1, nextlong2;
 static void check(uint64_t lo, uint64_t hi, uint64_t guess)
 {
 	// compute testOut1 = rotl64(lo+hi,17) + lo
@@ -87,7 +88,7 @@ static bool bruteKernel(uint64_t guess)
 	// ----------------------------------------------------------------------------
 	simd guess_bits[64];
 	foreach([&]<size_t i> {
-		if constexpr(i >= 9) {
+		if constexpr(i >= 6 + std::countr_zero(simd::size())) {
 			guess_bits[i] = guess >> i & 1 ? ~simd{} : simd{};
 		} else if constexpr(i >= 6) {
 			guess_bits[i] = simd([]<size_t j>(std::integral_constant<size_t, j>) {
@@ -787,27 +788,27 @@ static bool bruteKernel(uint64_t guess)
 	if(stdx::reduce(ok, std::bit_or<>{}) == 0)
 		return false;
 	if constexpr(FULL) {
-		uint64_t result_lo[512] {};
-		uint64_t result_hi[512] {};
+		uint64_t result_lo[SIMD_BITS] {};
+		uint64_t result_hi[SIMD_BITS] {};
 		
-		for(int j = 0; j < 512; ++j)
+		for(int j = 0; j < SIMD_BITS; ++j)
 		for (int i = 0; i < 64; ++i) {
 			result_lo[j] |= (static_cast<uint64_t>(S1_lo[i][j / 64]) >> (j % 64) & 1ULL) << i;
 			result_hi[j] |= (static_cast<uint64_t>(S1_hi[i][j / 64]) >> (j % 64) & 1ULL) << i;
 		}
 	
-		for(int j = 0; j < 512; ++j)
+		for(int j = 0; j < SIMD_BITS; ++j)
 			check(result_lo[j], result_hi[j], guess + j);
 	}
 	return true;
 }
 
-void crackFP(uint64_t nextlong1, uint64_t nextlong2)
+void KERNEL_NAME(uint64_t nextlong1, uint64_t nextlong2)
 {
 	::nextlong1 = nextlong1;
 	::nextlong2 = nextlong2;
 #pragma omp parallel for schedule(dynamic, 32768)
-	for(size_t i = 0; i < 1zu << 40; i += 512) {
+	for(uint64_t i = 0; i < uint64_t{1} << 40; i += SIMD_BITS) {
 		bool x = bruteKernel<false>(i);
 		if(x) [[unlikely]] {
 			bruteKernel<true>(i);

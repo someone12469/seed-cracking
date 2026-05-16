@@ -62,21 +62,27 @@ jobs:
         if: matrix.os == 'ubuntu-latest'
         working-directory: src/main/c
         run: |
-          g++ -shared -o libcrack.so blocks.cpp xsinv.cpp java_helper.cpp -std=c++23 -O3 -fopenmp -fPIC -static-libgcc -static-libstdc++ -Iz3/include -Lz3/bin -lz3 -I"$JAVA_HOME/include" -I"$JAVA_HOME/include/linux" -fvisibility=hidden -Wl,--exclude-libs,ALL
+          g++ -o xsinv_baseline.o xsinv.cpp -std=c++23 -O3 -fopenmp -fPIC -c -DKERNEL_NAME=crackFP_baseline -fvisibility=hidden
+          g++ -o xsinv_avx2.o xsinv.cpp -std=c++23 -O3 -fopenmp -fPIC -mavx2 -c -DKERNEL_NAME=crackFP_avx2 -fvisibility=hidden
+          g++ -o xsinv_avx512.o xsinv.cpp -std=c++23 -O3 -fopenmp -fPIC -mavx512f -c -DKERNEL_NAME=crackFP_avx512 -fvisibility=hidden
+          g++ -shared -o libcrack.so blocks.cpp java_helper.cpp xsinv_baseline.o xsinv_avx2.o xsinv_avx512.o -std=c++23 -O3 -fopenmp -fPIC -static-libgcc -static-libstdc++ -Iz3/include -Lz3/bin -lz3 -I"$JAVA_HOME/include" -I"$JAVA_HOME/include/linux" -fvisibility=hidden -Wl,--exclude-libs,ALL
           cp libcrack.so ../resources
 
       - name: Build cracking library (macos-latest)
         if: matrix.os == 'macos-latest'
         working-directory: src/main/c
         run: |
-          g++-15 -dynamiclib -o libcrack.dylib blocks.cpp xsinv.cpp java_helper.cpp -std=c++23 -O3 -fopenmp -fPIC -arch arm64 -arch x86_64 -static-libgcc -static-libstdc++ -Iz3/include -Lz3/bin -lz3 -I"$JAVA_HOME/include" -I"$JAVA_HOME/include/darwin" -fvisibility=hidden -Wl,-hidden-lgcc -Wl,-hidden-lstdc++
+          g++-15 -dynamiclib -o libcrack.dylib blocks.cpp xsinv.cpp java_helper.cpp -std=c++23 -O3 -fopenmp -fPIC -arch arm64 -arch x86_64 -static-libgcc -static-libstdc++ -Iz3/include -Lz3/bin -lz3 -I"$JAVA_HOME/include" -I"$JAVA_HOME/include/darwin" -fvisibility=hidden -Wl,-hidden-lgcc -Wl,-hidden-lstdc++ -DKERNEL_NAME=crackFP_baseline
           cp libcrack.dylib ../resources
 
       - name: Build cracking library (windows-latest)
         if: matrix.os == 'windows-latest'
         working-directory: src/main/c
         run: |
-          g++ -shared -o crack.dll blocks.cpp xsinv.cpp java_helper.cpp -std=c++23 -O3 -fopenmp "-Wl,-Bstatic" -lgomp -lwinpthread "-Wl,-Bdynamic" -static-libgcc -static-libstdc++ -Iz3/include -Lz3/bin -lz3 -I"$env:JAVA_HOME/include" -I"$env:JAVA_HOME/include/win32" -fvisibility=hidden "-Wl,--exclude-libs,ALL"
+          g++ -o xsinv_baseline.o xsinv.cpp -std=c++23 -O3 -fopenmp -c -DKERNEL_NAME=crackFP_baseline -fvisibility=hidden
+          g++ -o xsinv_avx2.o xsinv.cpp -std=c++23 -O3 -fopenmp -mavx2 -c -DKERNEL_NAME=crackFP_avx2 -fvisibility=hidden
+          g++ -o xsinv_avx512.o xsinv.cpp -std=c++23 -O3 -fopenmp -mavx512f -c -DKERNEL_NAME=crackFP_avx512 -fvisibility=hidden
+          g++ -shared -o crack.dll blocks.cpp java_helper.cpp xsinv_baseline.o xsinv_avx2.o xsinv_avx512.o -std=c++23 -O3 -fopenmp "-Wl,-Bstatic" -lgomp -lwinpthread "-Wl,-Bdynamic" -static-libgcc -static-libstdc++ -Iz3/include -Lz3/bin -lz3 -I"$env:JAVA_HOME/include" -I"$env:JAVA_HOME/include/win32" -fvisibility=hidden "-Wl,--exclude-libs,ALL"
           cp crack.dll ../resources
 
       - name: Capture shared libraries (ubuntu-latest)

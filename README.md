@@ -1,4 +1,4 @@
-Targets 26.1. JAR available on GitHub Releases and temporarily on GitHub Actions.
+Targets Minecraft 26.1. JAR available on [GitHub Releases](https://github.com/someone12469/seed-cracking/releases/latest) and temporarily on GitHub Actions.
 
 Mod usage:
 - Go to overworld location with untouched bedrock, deepslate-stone transition and ore veins.
